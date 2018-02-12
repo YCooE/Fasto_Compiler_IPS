@@ -46,7 +46,10 @@ let parse_error_rich =
 %token <(int*int)> LESS AND OR NOT
 
 %nonassoc ifprec letprec
-%left DEQ LTH AND OR NOT NEG
+%left OR
+%left AND
+%left NOT
+%left DEQ LTH NEG
 %left PLUS MINUS
 %left MULT DIV
 

@@ -66,9 +66,9 @@ let rec checkBinOp  (ftab : FunTable)
 (* Determine the type of an expression.  On the way, decorate each node in the
    syntax tree with inferred types.  The result consist of a pair: the result
    type tupled with the type-decorated expression. An exception is raised
-   immediately on the first type mismatch - this happens in "checkTypesEqualOrError".  
-   (It could instead collect each error as part of the result of checkExp and 
-    report all errors at the end.) 
+   immediately on the first type mismatch - this happens in "checkTypesEqualOrError".
+   (It could instead collect each error as part of the result of checkExp and
+    report all errors at the end.)
 *)
 and checkExp  (ftab : FunTable)
               (vtab : VarTable)
@@ -108,8 +108,12 @@ and checkExp  (ftab : FunTable)
         Implement by pattern matching Plus/Minus above.
         See `AbSyn.fs` for the expression constructors of `Times`, ...
     *)
-    | Times (_, _, _) ->        
-        failwith "Unimplemented type check of multiplication"
+    | Times (e1, e2, pos) ->
+        let (t1, e1') = checkExp ftab vtab e1
+        let (t2, e2') = checkExp ftab vtab e2
+        if (re1 == re2 and re1 == int)
+        then (Int, Times (e1', e2' pos))
+        else raise (MyError ("In Times: one of subexpression types is not Int: "+ppType t1+" and "+ppType t2, pos))
 
     | Divide (_, _, _) ->
         failwith "Unimplemented type check of division"
@@ -254,14 +258,14 @@ and checkExp  (ftab : FunTable)
              raise (err ("neutral element", n_type))
         else raise (err ("array element", elem_type))
 
-    (* TODO project task 2: 
-        See `AbSyn.fs` for the expression constructors of 
+    (* TODO project task 2:
+        See `AbSyn.fs` for the expression constructors of
         `Replicate`, `Filter`, `Scan`.
 
         Hints for `replicate(n, a)`:
         - recursively type check `n` and `a`
         - check that `n` has integer type
-        - assuming `a` is of type `t` the result type 
+        - assuming `a` is of type `t` the result type
           of replicate is `[t]`
     *)
     | Replicate (_, _, _, _) ->
@@ -279,9 +283,9 @@ and checkExp  (ftab : FunTable)
     | Filter (_, _, _, _) ->
         failwith "Unimplemented type check of map"
 
-    (* TODO project task 2: `scan(f, ne, arr)` 
+    (* TODO project task 2: `scan(f, ne, arr)`
         Hint: Implementation is very similar to `reduce(f, ne, arr)`.
-              (The difference between `scan` and `reduce` is that 
+              (The difference between `scan` and `reduce` is that
               scan's return type is the same as the type of `arr`,
               while reduce's return type is that of an element of `arr`).
     *)
@@ -362,4 +366,3 @@ let checkProg (funDecs : UntypedFunDec list) : TypedFunDec list =
       | Some (ret_type, args, mainpos) ->
         raise ( MyError("Unexpected argument to main: "+showFunType (args, ret_type)+
                         " (should be () -> <anything>)", mainpos) )
-
