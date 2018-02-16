@@ -37,6 +37,7 @@ let parse_error_rich =
 %token <int*(int*int)> NUM
 %token <char*(int*int)> CHARLIT
 %token <string*(int*int)> ID STRINGLIT
+%token <bool*(int*int)> TRUE FALSE
 %token <(int*int)> IF THEN ELSE LET IN EOF
 %token <(int*int)> INT CHAR BOOL
 %token <(int*int)> PLUS MINUS MULT DIV NEG
@@ -103,6 +104,8 @@ BinOp : PLUS  { (Lambda
 ///////////////////////////////////////////////////////
 
 Exp : NUM            { Constant (IntVal (fst $1), snd $1) }
+    | TRUE           { Constant (BoolVal (fst $1), snd $1)}
+    | FALSE          { Constant (BoolVal (fst $1), snd $1)}
     | CHARLIT        { Constant (CharVal (fst $1), snd $1) }
     | ID             { Var $1 }
     | STRINGLIT      { StringLit $1 }

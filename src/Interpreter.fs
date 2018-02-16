@@ -195,12 +195,12 @@ let rec evalExp (e : UntypedExp, vtab : VarTable, ftab : FunTable) : Value =
         match r1 with
           | BoolVal true -> BoolVal false
           | BoolVal false -> BoolVal true
-          | _ -> invalidOperands "Invalid not operand types" [(Bool, Bool)] r1 r1 pos
+          | _ -> invalidOperand "Invalid not operand type" Bool r1 pos
   | Negate(e1, pos) ->
         let r1 = evalExp(e1, vtab, ftab)
         match r1 with
           | IntVal n1  -> IntVal -n1
-          | _ -> invalidOperands "Invalid Negate operand types" [(Int, Int)] r1 r1 pos
+          | _ -> invalidOperand "Invalid Negate operand type" Int r1 pos
 
   | Equal(e1, e2, pos) ->
         let r1 = evalExp(e1, vtab, ftab)
