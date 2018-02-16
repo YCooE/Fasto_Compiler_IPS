@@ -177,30 +177,35 @@ let rec evalExp (e : UntypedExp, vtab : VarTable, ftab : FunTable) : Value =
           | _ -> invalidOperands "Divisions on non-integral args: " [(Int, Int)] res1 res2 pos
   | And(e1, e2, pos) ->
         let r1 = evalExp(e1, vtab, ftab)
-        let r2 = evalExp(e2, vtab, ftab)
-        match (r1, r2) with
-          | (BoolVal true, BoolVal true) -> BoolVal true
-          | (BoolVal _, BoolVal _      ) -> BoolVal false
-          | (_, _) -> invalidOperands "Invalid and operand types" [(Bool, Bool)] r1 r2 pos
+        match r1 with
+          | BoolVal false -> BoolVal false
+          | BoolVal true  -> let r2 = evalExp(e2, vtab, ftab)
+                             in match (r1, r2) with
+                                  | (_, BoolVal true)          -> BoolVal true
+                                  | (BoolVal _, BoolVal false) -> BoolVal false
+                                  | (_, _) -> invalidOperands "Invalid && operand types " [(Bool, Bool)] r1 r2 pos
+          | _ -> invalidOperand "Invalid && operand type " Bool r1 pos
   | Or(e1, e2, pos) ->
         let r1 = evalExp(e1, vtab, ftab)
-        let r2 = evalExp(e2, vtab, ftab)
-        match (r1, r2) with
-          | (BoolVal true, BoolVal _) -> BoolVal true
-          | (BoolVal _, BoolVal true) -> BoolVal true
-          | (BoolVal _, BoolVal _)    -> BoolVal false
-          | (_, _) -> invalidOperands "Invalid or operand types" [(Bool, Bool)] r1 r2 pos
+        match r1 with
+          | BoolVal true  -> BoolVal true
+          | BoolVal false -> let r2 = evalExp(e2, vtab, ftab)
+                             in match (r1, r2) with
+                                  | (_, BoolVal true)          -> BoolVal true
+                                  | (BoolVal _, BoolVal false) -> BoolVal false
+                                  | (_, _) -> invalidOperands "Invalid || operand types " [(Bool, Bool)] r1 r2 pos
+          | _ -> invalidOperand "Invalid || operand type " Bool r1 pos
   | Not(e1, pos) ->
         let r1 = evalExp(e1, vtab, ftab)
         match r1 with
           | BoolVal true -> BoolVal false
           | BoolVal false -> BoolVal true
-          | _ -> invalidOperand "Invalid not operand type" Bool r1 pos
+          | _ -> invalidOperand "Invalid not operand type " Bool r1 pos
   | Negate(e1, pos) ->
         let r1 = evalExp(e1, vtab, ftab)
         match r1 with
           | IntVal n1  -> IntVal -n1
-          | _ -> invalidOperand "Invalid Negate operand type" Int r1 pos
+          | _ -> invalidOperand "Invalid Negate operand type " Int r1 pos
 
   | Equal(e1, e2, pos) ->
         let r1 = evalExp(e1, vtab, ftab)
