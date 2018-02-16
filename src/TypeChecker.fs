@@ -115,8 +115,12 @@ and checkExp  (ftab : FunTable)
         then (Int, Times (e1_dec, e2_dec, pos))
         else raise (MyError ("In Times: one of subexpression types is not Int: "+ppType t1+" and "+ppType t2, pos))
 
-    | Divide (_, _, _) ->
-        failwith "Unimplemented type check of division"
+    | Divide (e1, e2, pos) ->
+        let (t1, e1_dec) = checkExp ftab vtab e1
+        let (t2, e2_dec) = checkExp ftab vtab e2
+        if (Int = t1 && Int = t2)
+        then (Int, Divide (e1_dec, e2_dec, pos))
+        else raise (MyError ("In Times: one of subexpression types is not Int: "+ppType t1+" and "+ppType t2, pos))
 
     | And (_, _, _) ->
         failwith "Unimplemented type check of &&"
