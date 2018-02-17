@@ -224,6 +224,15 @@ let rec evalExp (e : UntypedExp, vtab : VarTable, ftab : FunTable) : Value =
           | (BoolVal _,     BoolVal _   ) -> BoolVal false
           | (CharVal c1,    CharVal c2  ) -> BoolVal ( (int c1) < (int c2) )
           | (_, _) -> invalidOperands "Invalid less-than operand types" [(Int, Int); (Bool, Bool); (Char, Char)] r1 r2 pos
+  | More(e1, e2, pos) ->
+        let r1 = evalExp(e1, vtab, ftab)
+        let r2 = evalExp(e2, vtab, ftab)
+        match (r1, r2) with
+          | (IntVal  n1,    IntVal  n2  ) -> BoolVal (n1 > n2)
+          | (BoolVal true, BoolVal false) -> BoolVal true
+          | (BoolVal _,     BoolVal _   ) -> BoolVal false
+          | (CharVal c1,    CharVal c2  ) -> BoolVal ( (int c1) > (int c2) )
+          | (_, _) -> invalidOperands "Invalid more-than operand types" [(Int, Int); (Bool, Bool); (Char, Char)] r1 r2 pos
   | If(e1, e2, e3, pos) ->
         let cond = evalExp(e1, vtab, ftab)
         match cond with

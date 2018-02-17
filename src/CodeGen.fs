@@ -407,6 +407,13 @@ let rec compileExp  (e      : TypedExp)
       let code2 = compileExp e2 vtable t2
       code1 @ code2 @ [Mips.SLT (place,t1,t2)]
 
+  | More (e1, e2, pos) ->
+      let t1 = newName"lt_L"
+      let t2 = newName"lt_R"
+      let code1 = compileExp e1 vtable t1
+      let code2 = compileExp e2 vtable t2
+      code1 @ code2 @ [Mips.SLT (place,t1,t2)]
+
   (* TODO project task 1:
         Look in `AbSyn.fs` for the expression constructors of `And` and `Or`.
         The implementation of `And` and `Or` is more complicated than `Plus`

@@ -154,7 +154,15 @@ and checkExp  (ftab : FunTable)
                                         , pos))
           | (true, Array _) -> raise (MyError ("Cannot compare arrays", pos))
           | _ -> (Bool, Less (e1', e2', pos))
-
+    | More (e1, e2, pos) ->
+        let  (t1, e1') = checkExp ftab vtab e1
+        let  (t2, e2') = checkExp ftab vtab e2
+        match (t1 = t2, t1) with
+          | (false, _) -> raise (MyError( "Cannot compare "+ ppType t1 +
+                                          "and "+ppType t2+"for equality"
+                                        , pos))
+          | (true, Array _) -> raise (MyError ("Cannot compare arrays", pos))
+          | _ -> (Bool, More (e1', e2', pos))
     | If (pred, e1, e2, pos) ->
         let (pred_t, pred') = checkExp ftab vtab pred
         let (t1, e1') = checkExp ftab vtab e1

@@ -105,6 +105,7 @@ type Exp<'T> =
   | Minus of Exp<'T> * Exp<'T> * Position
   | Equal of Exp<'T> * Exp<'T> * Position
   | Less  of Exp<'T> * Exp<'T> * Position
+  | More  of Exp<'T> * Exp<'T> * Position
   | If    of Exp<'T> * Exp<'T> * Exp<'T> * Position
   | Apply of string * Exp<'T> list * Position
   | Let   of Dec<'T> * Exp<'T> * Position
@@ -221,6 +222,7 @@ let rec ppExp d = function
   | Negate (e, _)               -> "~(" + ppExp d e + ")"
   | Equal (e1, e2, _)           -> "(" + ppExp d e1 + " == " + ppExp d e2 + ")"
   | Less (e1, e2, _)            -> "(" + ppExp d e1 + " < " + ppExp d e2 + ")"
+  | More (e1, e2, _)            -> "(" + ppExp d e1 + " > " + ppExp d e2 + ")"
   | If (e1, e2, e3, _)          -> ("if (" + ppExp d e1 + ")\n" +
                                     indent (d+2) + "then " + ppExp (d+2) e2 + "\n" +
                                     indent (d+2) + "else " + ppExp (d+2) e3 + "\n" +
@@ -266,6 +268,7 @@ let expPos = function
   | Minus (_, _, p) -> p
   | Equal (_, _, p) -> p
   | Less (_, _, p) -> p
+  | More (_, _, p) -> p
   | If (_, _, _, p) -> p
   | Apply (_, _, p) -> p
   | Let (_, _, p) -> p
