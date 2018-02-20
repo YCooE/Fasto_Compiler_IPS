@@ -133,14 +133,20 @@ and checkExp  (ftab : FunTable)
         let (t1, e1_dec) = checkExp ftab vtab e1
         let (t2, e2_dec) = checkExp ftab vtab e2
         if (Bool = t1 && Bool = t2)
-        then (Bool, And (e1_dec, e2_dec, pos))
+        then (Bool, Or (e1_dec, e2_dec, pos))
         else raise (MyError ("In Or: one of subexpression types is not Bool: "+ppType t1+" and "+ppType t2, pos))
 
-    | Not (_, _) ->
-        failwith "Unimplemented type check of not"
+    | Not (e1, pos) ->
+        let (t1, e1_dec) = checkExp ftab vtab e1
+        if (Bool = t1)
+        then (Bool, Not (e1_dec, pos))
+        else raise (MyError ("In Not: the subexpression type is not Bool: "+ppType t1, pos))
 
-    | Negate (_, _) ->
-        failwith "Unimplemented type check of negate"
+    | Negate (e1, pos) ->
+        let (t1, e1_dec) = checkExp ftab vtab e1
+        if (Int = t1)
+        then (Int, Negate (e1_dec, pos))
+        else raise (MyError ("In Negate: the subexpression type is not Int: "+ppType t1, pos))
 
     (* The types for e1, e2 must be the same. The result is always a Bool. *)
     | Equal (e1, e2, pos) ->

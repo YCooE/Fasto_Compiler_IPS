@@ -1,0 +1,5 @@
+fun int main() =
+  let x = true in
+  let y = not(x) in
+  if y then let a = write(0) in 0
+  else let b = write(1) in 1

@@ -259,11 +259,25 @@ let rec compileExp  (e      : TypedExp)
       let code2 = compileExp e2 vtable t2
       code1 @ code2 @ [Mips.DIV (place,t1,t2)]
 
-  | Not (_, _) ->
-      failwith "Unimplemented code generation of not"
+  | Not (e1, pos) ->
+      let t1 = newName "not"
+      let code1 = compileExp e1 vtable t1
+      let skipLabel = newName "skip"
+      code1 @
+      [ Mips.LI (place, "0")
+      ; Mips.BNE (t1, place, skipLabel)
+      ; Mips.LI (place, "1")
+      ; Mips.LABEL skipLabel
+      ]
 
-  | Negate (_, _) ->
-      failwith "Unimplemented code generation of negate"
+  | Negate (e1, pos) ->
+      let t1 = newName "not"
+      let code1 = compileExp e1 vtable t1
+      let skipLabel = newName "skip"
+      code1 @
+      [ Mips.LI (place, "0")
+      ; Mips.SUB (place, place, t1)
+      ]
 
   | Let (dec, e1, pos) ->
       let (code1, vtable1) = compileDec dec vtable
@@ -392,7 +406,7 @@ let rec compileExp  (e      : TypedExp)
       let t2 = newName "eq_R"
       let code1 = compileExp e1 vtable t1
       let code2 = compileExp e2 vtable t2
-      let falseLabel = newName "falsegay"
+      let falseLabel = newName "false"
       code1 @ code2 @
        [ Mips.LI (place,"0")
        ; Mips.BNE (t1,t2,falseLabel)
@@ -427,10 +441,13 @@ let rec compileExp  (e      : TypedExp)
       let code1 = compileExp e1 vtable t1
       let code2 = compileExp e2 vtable t2
       let falseLabel = newName "false"
-      code1 @ code2 @
-       [ Mips.LI (place, "0")
-       ; Mips.BEQ(t1, place, falseLabel)
-       ; Mips.BEQ(t2, place, falseLabel)
+
+      let eval1 = [ Mips.LI (place, "0")
+                  ; Mips.BEQ(t1, place, falseLabel)
+                  ]
+
+      code1 @ eval1 @ code2 @
+       [ Mips.BEQ(t2, place, falseLabel)
        ; Mips.LI (place, "1")
        ; Mips.LABEL falseLabel
        ]
@@ -442,10 +459,13 @@ let rec compileExp  (e      : TypedExp)
       let code1 = compileExp e1 vtable t1
       let code2 = compileExp e2 vtable t2
       let trueLabel = newName "true"
-      code1 @ code2 @
-       [ Mips.LI (place, "1")
-       ; Mips.BEQ(t1, place, trueLabel)
-       ; Mips.BEQ(t2, place, trueLabel)
+
+      let eval1 = [ Mips.LI (place, "1")
+                  ; Mips.BEQ(t1, place, trueLabel)
+                  ]
+
+      code1 @ eval1 @ code2 @
+       [ Mips.BEQ(t2, place, trueLabel)
        ; Mips.LI (place, "0")
        ; Mips.LABEL trueLabel
        ]
