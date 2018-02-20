@@ -120,13 +120,21 @@ and checkExp  (ftab : FunTable)
         let (t2, e2_dec) = checkExp ftab vtab e2
         if (Int = t1 && Int = t2)
         then (Int, Divide (e1_dec, e2_dec, pos))
-        else raise (MyError ("In Times: one of subexpression types is not Int: "+ppType t1+" and "+ppType t2, pos))
+        else raise (MyError ("In Divide: one of subexpression types is not Int: "+ppType t1+" and "+ppType t2, pos))
 
-    | And (_, _, _) ->
-        failwith "Unimplemented type check of &&"
+    | And (e1, e2, pos) ->
+        let (t1, e1_dec) = checkExp ftab vtab e1
+        let (t2, e2_dec) = checkExp ftab vtab e2
+        if (Bool = t1 && Bool = t2)
+        then (Bool, And (e1_dec, e2_dec, pos))
+        else raise (MyError ("In And: one of subexpression types is not Bool: "+ppType t1+" and "+ppType t2, pos))
 
-    | Or (_, _, _) ->
-        failwith "Unimplemented type check of ||"
+    | Or (e1, e2, pos) ->
+        let (t1, e1_dec) = checkExp ftab vtab e1
+        let (t2, e2_dec) = checkExp ftab vtab e2
+        if (Bool = t1 && Bool = t2)
+        then (Bool, And (e1_dec, e2_dec, pos))
+        else raise (MyError ("In Or: one of subexpression types is not Bool: "+ppType t1+" and "+ppType t2, pos))
 
     | Not (_, _) ->
         failwith "Unimplemented type check of not"

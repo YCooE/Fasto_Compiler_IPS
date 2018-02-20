@@ -1,0 +1,28 @@
+// Tests all combinations of OR/||
+fun int fail() =
+  let v = write("0") in
+  0
+
+fun int test3() =
+  let e = false in
+  let f = false in
+  if e || f then fail ()
+  else let v = write("1") in 1
+
+fun int test2() =
+  let c = true in
+  let d = false in
+  if c || d then test3()
+  else fail()
+
+fun int test1() =
+  let a = false in
+  let b = true in
+  if a || b then test2()
+  else fail()
+
+fun int main() =
+  let x = true in
+  let y = true in
+  if x || y then test1()
+  else fail()

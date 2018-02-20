@@ -392,7 +392,7 @@ let rec compileExp  (e      : TypedExp)
       let t2 = newName "eq_R"
       let code1 = compileExp e1 vtable t1
       let code2 = compileExp e2 vtable t2
-      let falseLabel = newName "false"
+      let falseLabel = newName "falsegay"
       code1 @ code2 @
        [ Mips.LI (place,"0")
        ; Mips.BNE (t1,t2,falseLabel)
@@ -421,11 +421,34 @@ let rec compileExp  (e      : TypedExp)
         in `e1 || e2` if the execution of `e1` will evaluate to `true` then
         the code of `e2` must not be executed. Similar for `And` (&&).
   *)
-  | And (_, _, _) ->
-      failwith "Unimplemented code generation of &&"
+  | And (e1, e2, pos) ->
+      let t1 = newName "and_L"
+      let t2 = newName "and_R"
+      let code1 = compileExp e1 vtable t1
+      let code2 = compileExp e2 vtable t2
+      let falseLabel = newName "false"
+      code1 @ code2 @
+       [ Mips.LI (place, "0")
+       ; Mips.BEQ(t1, place, falseLabel)
+       ; Mips.BEQ(t2, place, falseLabel)
+       ; Mips.LI (place, "1")
+       ; Mips.LABEL falseLabel
+       ]
 
-  | Or (_, _, _) ->
-      failwith "Unimplemented code generation of ||"
+
+  | Or (e1, e2, pos) ->
+      let t1 = newName "or_L"
+      let t2 = newName "or_R"
+      let code1 = compileExp e1 vtable t1
+      let code2 = compileExp e2 vtable t2
+      let trueLabel = newName "true"
+      code1 @ code2 @
+       [ Mips.LI (place, "1")
+       ; Mips.BEQ(t1, place, trueLabel)
+       ; Mips.BEQ(t2, place, trueLabel)
+       ; Mips.LI (place, "0")
+       ; Mips.LABEL trueLabel
+       ]
 
   (* Indexing:
      1. generate code to compute the index
