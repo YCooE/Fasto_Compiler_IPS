@@ -307,8 +307,14 @@ let rec evalExp (e : UntypedExp, vtab : VarTable, ftab : FunTable) : Value =
          the value of `a`; otherwise raise an error (containing
          a meaningful message).
   *)
-  | Replicate (_, _, _, _) ->
-        failwith "Unimplemented interpretation of replicate"
+  | Replicate (exp1, exp2, _, pos) ->
+        let e1 = evalExp(exp1, vtab, ftab)
+        let n = match e1 with
+                  | IntVal n -> if n >= 0 then n
+                                else raise (MyError ("First argument must be greater than or equal to zero: "+ppVal 0 e1, pos))
+                  | _        -> raise (MyError ("First argument must be of type int: "+ppVal 0 e1, pos))
+        let e2 = evalExp(exp2, vtab, ftab)
+        ArrayVal (List.replicate n e2, valueType e2)
 
   (* TODO project task 2: `filter(p, arr)`
        pattern match the implementation of map:
