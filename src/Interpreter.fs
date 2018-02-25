@@ -180,20 +180,20 @@ let rec evalExp (e : UntypedExp, vtab : VarTable, ftab : FunTable) : Value =
         match r1 with
           | BoolVal false -> BoolVal false
           | BoolVal true  -> let r2 = evalExp(e2, vtab, ftab)
-                             in match (r1, r2) with
-                                  | (_, BoolVal true)          -> BoolVal true
-                                  | (BoolVal _, BoolVal false) -> BoolVal false
-                                  | (_, _) -> invalidOperands "Invalid && operand types " [(Bool, Bool)] r1 r2 pos
+                             in match r2 with
+                                  | BoolVal true  -> BoolVal true
+                                  | BoolVal false -> BoolVal false
+                                  | _ -> invalidOperands "Invalid && operand types " [(Bool, Bool)] r1 r2 pos
           | _ -> invalidOperand "Invalid && operand type " Bool r1 pos
   | Or(e1, e2, pos) ->
         let r1 = evalExp(e1, vtab, ftab)
         match r1 with
           | BoolVal true  -> BoolVal true
           | BoolVal false -> let r2 = evalExp(e2, vtab, ftab)
-                             in match (r1, r2) with
-                                  | (_, BoolVal true)          -> BoolVal true
-                                  | (BoolVal _, BoolVal false) -> BoolVal false
-                                  | (_, _) -> invalidOperands "Invalid || operand types " [(Bool, Bool)] r1 r2 pos
+                             in match r2 with
+                                  | BoolVal true  -> BoolVal true
+                                  | BoolVal false -> BoolVal false
+                                  | _ -> invalidOperands "Invalid || operand types " [(Bool, Bool)] r1 r2 pos
           | _ -> invalidOperand "Invalid || operand type " Bool r1 pos
   | Not(e1, pos) ->
         let r1 = evalExp(e1, vtab, ftab)
