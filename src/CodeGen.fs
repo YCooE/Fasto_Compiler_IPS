@@ -426,7 +426,7 @@ let rec compileExp  (e      : TypedExp)
       let t2 = newName"lt_R"
       let code1 = compileExp e1 vtable t1
       let code2 = compileExp e2 vtable t2
-      code1 @ code2 @ [Mips.SLT (place,t1,t2)]
+      code1 @ code2 @ [Mips.SLT (place,t2,t1)]
 
   (* TODO project task 1:
         Look in `AbSyn.fs` for the expression constructors of `And` and `Or`.
