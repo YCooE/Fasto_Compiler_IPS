@@ -22,13 +22,21 @@ let rec copyConstPropFoldExp (vtable : VarTable)
         (* Copy propagation is handled entirely in the following three
         cases for variables, array indexing, and let-bindings. *)
         | Var (name, pos) ->
+            (*
+            let if_exists = match (SymTab.lookup name vtable) with
+                            | Some _ -> true
+                            | None -> false
+            if if_exists
+            then SymTab.fromList name
+            else Var(name, pos)
+            *)
             (* TODO project task 3:
                 Should probably look in the symbol table to see if
                 a binding corresponding to the current variable `name`
                 exists and if so, it should replace the current expression
                 with the binded variable or constant.
             *)
-            failwith "Unimplemented copyConstPropFold for Var"
+            failwith "Unimplemented copyConstPropFold for Index"
         | Index (name, e, t, pos) ->
             (* TODO project task 3:
                 Should probably do the same as the `Var` case, for
@@ -70,14 +78,22 @@ let rec copyConstPropFoldExp (vtable : VarTable)
                 | _ -> (* Fallthrough - for everything else, do nothing *)
                     let body' = copyConstPropFoldExp vtable body
                     Let (Dec (name, e', decpos), body', pos)
-        | Times (_, _, _) ->
+        | Times (e1, e2, pos) ->
+            let e1' = copyConstPropFoldExp vtable e1
+            let e2' = copyConstPropFoldExp vtable e2
+            match (e1', e2') with
+                | (Constant (IntVal x, _), Constant (IntVal y, _)) ->
+                   Constant (IntVal (x * y), pos)
+                | (Constant (IntVal 0, _), _) -> e1
+                | (_, Constant (IntVal  0, _)) -> e2
+                | _ -> Times (e1', e2', pos)
+        (* NUT FNISHED AT ALL *)
             (* TODO project task 3: implement as many safe algebraic
-                simplifications as you can think of. You may inspire 
+                simplifications as you can think of. You may inspire
                 yourself from the case of `Plus`. For example:
-                     1 * x = ? 
+                     1 * x = ?
                      x * 0 = ?
             *)
-            failwith "Unimplemented copyConstPropFold for multiplication"
         | And (e1, e2, pos) ->
             (* TODO project task 3: see above. you may inspire yourself from `Or` *)
             failwith "Unimplemented copyConstPropFold for &&"

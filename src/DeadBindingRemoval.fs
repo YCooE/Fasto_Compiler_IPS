@@ -6,7 +6,7 @@ module DeadBindingRemoval
 
 open AbSyn
 
-type DBRtab = SymTab.SymTab<unit>    
+type DBRtab = SymTab.SymTab<unit>
 
 let isUsed (name : string) (stab : DBRtab) =
     match SymTab.lookup name stab with
@@ -26,7 +26,7 @@ let rec unzip3 = function
 
 let anytrue = List.exists (fun x -> x)
 
-(*  Input: the expression to be optimised (by removing inner dead bindings) 
+(*  Input: the expression to be optimised (by removing inner dead bindings)
     The result is a three-tuple:
       - bool refers to whether the expression contains IO
       - DBRtab is the symbol table that is synthesized from processing the
@@ -34,7 +34,7 @@ let anytrue = List.exists (fun x -> x)
       - the TypedExp is the resulting (optimised) expression
     The idea is that you do a bottom-up traversal of AbSyn, and you record
         any (variable) names that you find in the symbol table. You find such
-        names when (1) the expression is a `Var` expression or an `Index` 
+        names when (1) the expression is a `Var` expression or an `Index`
         expression.
     Then, whenever you reach a `Let` expression, you check whether the body
         of the let has used the variable name currently defined. If not, then
@@ -61,26 +61,35 @@ let rec removeDeadBindingsInExp (e : TypedExp) : (bool * DBRtab * TypedExp) =
 
         (* ToDO: Task 3: implement the cases of `Var`, `Index` and `Let` expressions below *)
         | Var (name, pos) ->
+            (false, SymTab.bind name () (SymTab.empty()), Var(name, pos))
             (* Task 3, Hints for the `Var` case:
                   - 1st element of result tuple: can a variable name contain IO?
                   - 2nd element of result tuple: you have discovered a name, hence
                         you need to record it in a new symbol table.
                   - 3rd element of the tuple: should be the optimised expression.
             *)
-            failwith "Unimplemented removeDeadBindingsInExp for Var"
 
         | Index (name, e, t, pos) ->
+            let (IOe, vtablee, e') = removeDeadBindingsInExp e
+            (IOe, SymTab.bind name () vtablee, Index(name, e', t, pos))
             (* Task 3, `Index` case: is similar to the `Var` case, except that,
-                        additionally, you also need to recursively optimize the index 
+                        additionally, you also need to recursively optimize the index
                         expression `e` and to propagate its results (in addition
                         to recording the use of `name`).
             *)
-            failwith "Unimplemented removeDeadBindingsInExp for Index"
 
         | Let (Dec (name, e, decpos), body, pos) ->
+            let (IObody, vtablebody, body') = removeDeadBindingsInExp body
+            let (IOe, vtablee, e') = removeDeadBindingsInExp e
+            let is_used = match (SymTab.lookup name vtablebody) with
+                          | Some _ -> true
+                          | None   -> false
+            if (is_used || IOe)
+            then (IOe || IObody, SymTab.combine vtablebody vtablee, Let (Dec (name, e', decpos), body', pos))
+            else (IObody, vtablebody, body')
             (* Task 3, Hints for the `Let` case:
                   - recursively process the `body` of the let-binding.
-                  - if `name` was not found to have been used in `body` 
+                  - if `name` was not found to have been used in `body`
                     then simply return the result obtained from the body
                     otherwise
                   - recursively process the binded expression `e` and
@@ -92,7 +101,6 @@ let rec removeDeadBindingsInExp (e : TypedExp) : (bool * DBRtab * TypedExp) =
                       -- construct the the new `Let` expression from
                          the resulted optimized subexpressions.
             *)
-            failwith "Unimplemented removeDeadBindingsInExp for Let"
 
         | Plus (x, y, pos) ->
             let (xios, xuses, x') = removeDeadBindingsInExp x
@@ -118,6 +126,12 @@ let rec removeDeadBindingsInExp (e : TypedExp) : (bool * DBRtab * TypedExp) =
             (xios || yios,
              SymTab.combine xuses yuses,
              Less (x', y', pos))
+        | More (x, y, pos) ->
+            let (xios, xuses, x') = removeDeadBindingsInExp x
+            let (yios, yuses, y') = removeDeadBindingsInExp y
+            (xios || yios,
+             SymTab.combine xuses yuses,
+             More (x', y', pos))
         | If (e1, e2, e3, pos) ->
             let (ios1, uses1, e1') = removeDeadBindingsInExp e1
             let (ios2, uses2, e2') = removeDeadBindingsInExp e2
@@ -222,4 +236,3 @@ let removeDeadBindingsInFunDec (FunDec (fname, rettype, paramls, body, pos)) =
 (* Entrypoint: remove dead bindings from the whole program *)
 let removeDeadBindings (prog : TypedProg) =
     List.map removeDeadBindingsInFunDec prog
-
