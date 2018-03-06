@@ -320,7 +320,7 @@ and checkExp  (ftab : FunTable)
                                ppFunArg 0 f + ":" + showFunType (args, res)
                              , pos ))
         if f_res_type = Bool && f_arg_type = elem_type
-        then (Array f_res_type
+        then (Array f_arg_type
              , Filter (f', arr_exp_dec, elem_type, pos))
         else raise (MyError( "Filter: array element types does not match." +
                             ppType elem_type + " instead of " + ppType f_arg_type
