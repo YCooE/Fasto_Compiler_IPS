@@ -294,8 +294,13 @@ and checkExp  (ftab : FunTable)
         - assuming `a` is of type `t` the result type
           of replicate is `[t]`
     *)
-    | Replicate (_, _, _, _) ->
-        failwith "Unimplemented type check of replicate"
+    | Replicate (n, a, _, pos) ->
+        let (n_type, n_dec) = checkExp ftab vtab n
+        let (a_type, a_dec) = checkExp ftab vtab a
+        if n_type = Int then
+            (Array a_type, Replicate(n_dec, a_dec, a_type, pos))
+        else raise (MyError( "Replicate: n type does not match." +
+                           ppType n_type + " instead of " + ppType Int                         , pos))
 
     (* TODO project task 2: Hint for `filter(f, arr)`
         Look into the type-checking lecture slides for the type rule of `map`
