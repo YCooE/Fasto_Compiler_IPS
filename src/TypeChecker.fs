@@ -300,8 +300,9 @@ and checkExp  (ftab : FunTable)
         if n_type = Int then
             (Array a_type, Replicate(n_dec, a_dec, a_type, pos))
         else raise (MyError( "Replicate: n type does not match." +
-                           ppType n_type + " instead of " + ppType Int                         , pos))
-
+                            ppType n_type + " instead of " + ppType Int
+                          , pos))
+                          
     (* TODO project task 2: Hint for `filter(f, arr)`
         Look into the type-checking lecture slides for the type rule of `map`
         and think of what needs to be changed for filter (?)
@@ -325,9 +326,9 @@ and checkExp  (ftab : FunTable)
                                ppFunArg 0 f + ":" + showFunType (args, res)
                              , pos ))
         if f_res_type = Bool && f_arg_type = elem_type
-        then (Array f_res_type
+        then (Array f_arg_type
              , Filter (f', arr_exp_dec, elem_type, pos))
-        else raise (MyError( "Map: array element types does not match." +
+        else raise (MyError( "Filter: array element types does not match." +
                             ppType elem_type + " instead of " + ppType f_arg_type
                           , pos))
     (* TODO project task 2: `scan(f, ne, arr)`
@@ -336,8 +337,33 @@ and checkExp  (ftab : FunTable)
               scan's return type is the same as the type of `arr`,
               while reduce's return type is that of an element of `arr`).
     *)
-    | Scan (_, _, _, _, _) ->
-        failwith "Unimplemented type check of scan"
+    | Scan (f, n_exp, arr_exp, _, pos) ->
+        let (n_type  , n_dec  ) = checkExp ftab vtab n_exp
+        let (arr_type, arr_dec) = checkExp ftab vtab arr_exp
+        let elem_type =
+            match arr_type with
+              | Array t -> t
+              | other -> raise (MyError ("Scan: Argument not an array", pos))
+        let (f', f_arg_type) =
+            match checkFunArg ftab vtab pos f with
+              | (f', res, [a1; a2]) ->
+                  if a1 = a2 && a2 = res
+                  then (f', res)
+                  else raise (MyError( "Scan: incompatible function type of " +
+                                       (ppFunArg 0 f) + ": " + showFunType ([a1; a2], res)
+                                     , pos))
+              | (_, res, args) ->
+                  raise (MyError ( "Scan: incompatible function type of " +
+                                   ppFunArg 0 f + ": " + showFunType (args, res)
+                                 , pos))
+        let err (s, t) = MyError ( "Scan: unexpected " + s + " type " + ppType t +
+                                   ", expected " + ppType f_arg_type
+                                 , pos)
+        if   elem_type = arr_type && elem_type = n_type then
+             (Array elem_type, Scan (f', n_dec, arr_dec, elem_type, pos))
+        else raise (MyError( "Scan: array element types does not match." +
+                            ppType elem_type + " instead of " + ppType arr_type
+                          , pos))
 
 and checkFunArg  (ftab : FunTable)
                  (vtab : VarTable)

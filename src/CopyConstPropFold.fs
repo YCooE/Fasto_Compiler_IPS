@@ -140,6 +140,16 @@ let rec copyConstPropFoldExp (vtable : VarTable)
                     if e1' = e2'
                     then Constant (BoolVal false, pos)
                     else Less (e1', e2', pos)
+        | More (e1, e2, pos) ->
+            let e1' = copyConstPropFoldExp vtable e1
+            let e2' = copyConstPropFoldExp vtable e2
+            match (e1', e2') with
+                | (Constant (IntVal v1, _), Constant (IntVal v2, _)) ->
+                    Constant (BoolVal (v1 > v2), pos)
+                | _ ->
+                    if e1' = e2'
+                    then Constant (BoolVal false, pos)
+                    else More (e1', e2', pos)
         | If (e1, e2, e3, pos) ->
             let e1' = copyConstPropFoldExp vtable e1
             match e1' with
