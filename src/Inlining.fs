@@ -25,6 +25,9 @@ let rec inlineInExp (graph : CallGraph)
         | Less (e1, e2, pos) ->
             Less (inlineInExp graph prog e1,
                   inlineInExp graph prog e2, pos)
+        | More (e1, e2, pos) ->
+            More (inlineInExp graph prog e1,
+                  inlineInExp graph prog e2, pos)
         | If (e1, e2, e3, pos) ->
             If (inlineInExp graph prog e1,
                 inlineInExp graph prog e2,

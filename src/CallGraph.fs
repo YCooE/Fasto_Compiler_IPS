@@ -34,6 +34,7 @@ let rec expCalls = function
     | Minus (e1, e2, _) -> expCalls e1 @ expCalls e2
     | Equal (e1, e2, _) -> expCalls e1 @ expCalls e2
     | Less (e1, e2, _) -> expCalls e1 @ expCalls e2
+    | More (e1, e2, _) -> expCalls e1 @ expCalls e2
     | If (e1, e2, e3, _) -> expCalls e1 @ expCalls e2 @ expCalls e3
     | Apply (fname, es, _) -> fname :: List.concat (List.map expCalls es)
     | Let ( Dec(_, e, _), body, _) -> expCalls e @ expCalls body

@@ -701,18 +701,18 @@ let rec compileExp  (e      : TypedExp)
       let elem_code  = compileExp elem_exp vtable elem_reg
       let addr_reg = newName "addr_reg" (* New array address *)
       let loop_header =
-              [ Mips.LW(size_reg, arr_reg, "0") (* sets size of size reg to first elem *)
-              ; Mips.ADDI(arr_reg, place, "4")
+              [ (* Mips.LW(size_reg, arr_reg, "0") *) (* sets size of size reg to first elem *)
+               Mips.ADDI(arr_reg, place, "4")
               ; Mips.ADDI(addr_reg, place, "4")
               ; Mips.MOVE(i_reg, "0")
               ; Mips.LABEL loop_beg
-              ; Mips.SUB (tmp_reg, i_reg, size_reg)
+              ; Mips.SUB (tmp_reg, i_reg, arr_reg)
               ; Mips.BGEZ (tmp_reg, loop_end)
               (* ; Mips.BEQ(i_reg, size_reg, loop_end) *)
               ]
       let loop_body =
               [ mipsStore elem_size (elem_reg, addr_reg, "0")
-              ; Mips.SW(addr_reg, arr_reg, "0")]
+              (* ; Mips.SW(addr_reg, arr_reg, "0") *) ]
       let loop_footer =
               [ Mips.ADDI(addr_reg, place, makeConst(elemSizeToInt elem_size))
               ; Mips.ADDI(arr_reg, place, makeConst(elemSizeToInt elem_size))
@@ -744,7 +744,7 @@ let rec compileExp  (e      : TypedExp)
          `Mips.SW(counter_reg, place, "0")` instruction.
   *)
   | Filter (_, _, _, _) ->
-      failwith "Unimplemented code generation of map"
+      failwith "Unimplemented code generation of filter"
 
   (* TODO project task 2: see also the comment to replicate.
      `scan(f, ne, arr)`: you can inspire yourself from the implementation of
