@@ -681,6 +681,8 @@ let rec compileExp  (e      : TypedExp)
   | Replicate (n_exp, elem_exp, elem_type, pos) ->
       let elem_size = getElemSize elem_type (* gets element size of type *)
       let size_reg = newName "size_reg" (* size of input/output array *)
+      let n_code = compileExp n_exp vtable size_reg
+
       let arr_reg  = newName "arr_reg"  (* address of array *)
       let elem_reg = newName "elem_reg" (* address of a single element *)
       let i_reg    = newName "ind_var"  (* loop counter *)
@@ -697,33 +699,31 @@ let rec compileExp  (e      : TypedExp)
                       ; Mips.ADDI (size_reg, size_reg, "1")
                       ]
 
-      let arr_code  = compileExp n_exp vtable arr_reg
       let elem_code  = compileExp elem_exp vtable elem_reg
       let addr_reg = newName "addr_reg" (* New array address *)
+
+      let loop_init =
+              [ Mips.ADDI(addr_reg, place, "4")
+              ; Mips.MOVE(i_reg, "0")]
+
       let loop_header =
-              [ (* Mips.LW(size_reg, arr_reg, "0") *) (* sets size of size reg to first elem *)
-               Mips.ADDI(arr_reg, place, "4")
-              ; Mips.ADDI(addr_reg, place, "4")
-              ; Mips.MOVE(i_reg, "0")
-              ; Mips.LABEL loop_beg
+              [ Mips.LABEL (loop_beg)
               ; Mips.SUB (tmp_reg, i_reg, arr_reg)
               ; Mips.BGEZ (tmp_reg, loop_end)
-              (* ; Mips.BEQ(i_reg, size_reg, loop_end) *)
               ]
       let loop_body =
-              [ mipsStore elem_size (elem_reg, addr_reg, "0")
-              (* ; Mips.SW(addr_reg, arr_reg, "0") *) ]
+              [ mipsStore elem_size (elem_reg, addr_reg, "0")]
       let loop_footer =
               [ Mips.ADDI(addr_reg, place, makeConst(elemSizeToInt elem_size))
-              ; Mips.ADDI(arr_reg, place, makeConst(elemSizeToInt elem_size))
               ; Mips.ADDI (i_reg, i_reg, "1")
               ; Mips.J loop_beg
               ; Mips.LABEL loop_end]
-      arr_code
+
+      n_code
+       @ elem_code
        @ checksize
        @ dynalloc (size_reg, place, elem_type)
-       @ arr_code
-       @ elem_code
+       @ loop_init
        @ loop_header
        @ loop_body
        @ loop_footer
