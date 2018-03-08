@@ -302,7 +302,7 @@ and checkExp  (ftab : FunTable)
         else raise (MyError( "Replicate: n type does not match." +
                             ppType n_type + " instead of " + ppType Int
                           , pos))
-                          
+
     (* TODO project task 2: Hint for `filter(f, arr)`
         Look into the type-checking lecture slides for the type rule of `map`
         and think of what needs to be changed for filter (?)
@@ -359,7 +359,7 @@ and checkExp  (ftab : FunTable)
         let err (s, t) = MyError ( "Scan: unexpected " + s + " type " + ppType t +
                                    ", expected " + ppType f_arg_type
                                  , pos)
-        if   elem_type = arr_type && elem_type = n_type then
+        if   elem_type = f_arg_type && elem_type = n_type then
              (Array elem_type, Scan (f', n_dec, arr_dec, elem_type, pos))
         else raise (MyError( "Scan: array element types does not match." +
                             ppType elem_type + " instead of " + ppType arr_type

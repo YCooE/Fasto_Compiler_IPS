@@ -753,8 +753,91 @@ let rec compileExp  (e      : TypedExp)
         the current location of the result iterator at every iteration of
         the loop.
   *)
-  | Scan (_, _, _, _, _) ->
-      failwith "Unimplemented code generation of scan"
+  | Scan (binop, acc_exp, arr_exp, tp, pos) ->
+      let arr_reg  = newName "arr_reg"
+      let acc_reg  = newName "acc_reg"
+      let i_reg    = newName "i_reg"
+      let size_reg = newName "size_reg"
+      let tmp_reg  = newName "tmp_reg"
+      let loop_beg = newName "loop_beg"
+      let loop_end = newName "loop_end"
+      let ret_reg  = newName "ret_reg"  // returned array
+
+      // Initialize accumulator and input array
+      let acc_code = compileExp acc_exp vtable acc_reg
+      let arr_code = compileExp arr_exp vtable arr_reg
+
+      // Get size of input array, and go to first element
+      let get_size = [ Mips.LW   (size_reg,  arr_reg, "0")
+                     ; Mips.ADDI (arr_reg ,  arr_reg, "4")
+                     ; Mips.ADDI (tmp_reg , size_reg, "1") // Tmp = size + 1
+                     ]
+
+      // Store size
+      let store_size = [ Mips.ADDI (ret_reg ,    place, "0") // Set ret_reg = place
+                       ; Mips.SW   (tmp_reg , ret_reg , "0") // Store length
+                       ; Mips.ADDI (ret_reg , ret_reg , "4") // Advance to first elem
+                       ]
+
+      // Before loop we store the first elem in ret array
+      let store_first = match getElemSize tp with
+                          | One  -> [ Mips.SB   (acc_reg, ret_reg, "0")
+                                    ; Mips.ADDI (ret_reg, ret_reg, "1")
+                                    ]
+                          | Four -> [ Mips.SW   (acc_reg, ret_reg, "0")
+                                    ; Mips.ADDI (ret_reg, ret_reg, "4")
+                                    ]
+
+      // Loop beginning
+      let loop_code = [ Mips.MOVE  (i_reg, "0"              )
+                      ; Mips.LABEL (loop_beg                )
+                      ; Mips.SUB   (tmp_reg, i_reg, size_reg)
+                      ; Mips.BGEZ  (tmp_reg, loop_end       )
+                      ]
+
+      // Loading code store in tmp
+      let load_code =
+              match getElemSize tp with
+                | One  -> [ Mips.LB   (tmp_reg, arr_reg, "0")
+                          ; Mips.ADDI (arr_reg, arr_reg, "1")
+                          ]
+                | Four -> [ Mips.LW   (tmp_reg, arr_reg, "0")
+                          ; Mips.ADDI (arr_reg, arr_reg, "4")
+                          ]
+
+      // Call function and store in ret_reg
+      let apply_code =
+              applyFunArg(binop, [tmp_reg; acc_reg], vtable, tmp_reg, pos)
+
+      // Update acc & store result
+      let inc_ret =
+              match getElemSize tp with
+                | One  -> [ Mips.MOVE (acc_reg, tmp_reg     )
+                          ; Mips.SB   (tmp_reg, ret_reg, "0")
+                          ; Mips.ADDI (ret_reg, ret_reg, "1")
+                          ]
+                | Four -> [ Mips.MOVE (acc_reg, tmp_reg     )
+                          ; Mips.SW   (tmp_reg, ret_reg, "0")
+                          ; Mips.ADDI (ret_reg, ret_reg, "4")
+                          ]
+
+      // Increment i with 1 loop back.
+      let loop_footer = [ Mips.ADDI   (i_reg, i_reg, "1")
+                        ; Mips.J      loop_beg
+                        ; Mips.LABEL  loop_end
+                        ]
+
+      acc_code
+       @ arr_code
+       @ get_size
+       @ dynalloc(tmp_reg, place, tp)
+       @ store_size
+       @ store_first
+       @ loop_code
+       @ load_code
+       @ apply_code
+       @ inc_ret
+       @ loop_footer
 
 and applyFunArg ( ff     : TypedFunArg
                 , args   : Mips.reg list
