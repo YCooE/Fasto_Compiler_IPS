@@ -743,8 +743,69 @@ let rec compileExp  (e      : TypedExp)
          counter computed in step (c). You do this of course with a
          `Mips.SW(counter_reg, place, "0")` instruction.
   *)
-  | Filter (_, _, _, _) ->
-      failwith "Unimplemented code generation of filter"
+  | Filter (farg, arr_exp, elem_type, pos) ->
+      let size_reg = newName "size_reg" (* size of input array *)
+      let arr_reg  = newName "arr_reg"  (* address of input array *)
+      let elem_reg = newName "elem_reg" (* address of single element *)
+      let res_reg  = newName "res_reg"
+      let c_reg = newName "counter_reg" (* counter for predicate*)
+      let arr_code = compileExp arr_exp vtable arr_reg
+
+      let get_size = [ Mips.LW (size_reg, arr_reg, "0") ]
+
+      let addr_reg = newName "addr_reg" (* address of element in new array *)
+      let i_reg = newName "i_reg"
+      let init_regs = [ Mips.ADDI (addr_reg, place, "4")
+                      ; Mips.MOVE (i_reg, "0")
+                      ; Mips.ADDI (elem_reg, arr_reg, "4")
+                      ; Mips.MOVE (c_reg, "0")
+                      ]
+      let loop_beg = newName "loop_beg"
+      let loop_end = newName "loop_end"
+      let tmp_reg = newName "tmp_reg"
+      let loop_header = [ Mips.LABEL (loop_beg)
+                        ; Mips.SUB (tmp_reg, i_reg, size_reg)
+                        ; Mips.BGEZ (tmp_reg, loop_end) ]
+      (* Result of predicate function for a given element *)
+      let loop_filter0 =
+          match getElemSize elem_type with
+            | One  -> Mips.LB(res_reg, elem_reg, "0")
+                         :: applyFunArg(farg, [res_reg], vtable, tmp_reg, pos)
+                         @  [ Mips.ADDI(elem_reg, elem_reg, "1") ]
+            | Four -> Mips.LW(res_reg, elem_reg, "0")
+                         :: applyFunArg(farg, [res_reg], vtable, tmp_reg, pos)
+                         @ [ Mips.ADDI(elem_reg, elem_reg, "4") ]
+
+      let pred_false = newName"pred_false"
+      (* If Predicate is true move element to result *)
+      let loop_filter1 = [ Mips.BEQ   (tmp_reg, "0", pred_false)
+                         ; Mips.ADDI  (c_reg, c_reg, "1")
+                         ]
+      (* Store result if predicate is true*)
+      let loop_filter2 =
+          match getElemSize elem_type with
+          | One  -> [ Mips.SB (res_reg, addr_reg, "0") ]
+          | Four -> [ Mips.SW (res_reg, addr_reg, "0") ]
+
+      let loop_footer =
+              [ Mips.ADDI (addr_reg, addr_reg,
+                           makeConst (elemSizeToInt (getElemSize elem_type)))
+              ; Mips.LABEL (pred_false)
+              ; Mips.ADDI (i_reg, i_reg, "1")
+              ; Mips.J loop_beg
+              ; Mips.LABEL loop_end
+              ; Mips.SW(c_reg, place, "0")
+              ]
+      arr_code
+       @ get_size
+       @ dynalloc (size_reg, place, elem_type)
+       @ init_regs
+       @ loop_header
+       @ loop_filter0
+       @ loop_filter1
+       @ loop_filter2
+       @ loop_footer
+
 
   (* TODO project task 2: see also the comment to replicate.
      `scan(f, ne, arr)`: you can inspire yourself from the implementation of
