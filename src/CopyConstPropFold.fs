@@ -27,7 +27,8 @@ let rec copyConstPropFoldExp (vtable : VarTable)
                             | Some _ -> true
                             | None -> false
             if if_exists
-            then SymTab.fromList name
+            then let newname = SymTab.fromList name
+            Var(newname, pos)
             else Var(name, pos)
             *)
             (* TODO project task 3:
@@ -84,10 +85,13 @@ let rec copyConstPropFoldExp (vtable : VarTable)
             match (e1', e2') with
                 | (Constant (IntVal x, _), Constant (IntVal y, _)) ->
                    Constant (IntVal (x * y), pos)
-                | (Constant (IntVal 0, _), _) -> e1
-                | (_, Constant (IntVal  0, _)) -> e2
+                | (Constant (IntVal 0, _), _) -> Constant(IntVal 0, pos)
+                | (_, Constant (IntVal  0, _)) -> Constant(IntVal 0, pos)
+                | (Constant (IntVal 1, _), _) -> e1'
+                | (_, Constant (IntVal 1, _)) -> e2'
+                | (Constant (IntVal -1, _), _) -> Negate (e1', pos)
+                | (_, Constant (IntVal -1, _)) -> Negate (e2', pos)
                 | _ -> Times (e1', e2', pos)
-        (* NUT FNISHED AT ALL *)
             (* TODO project task 3: implement as many safe algebraic
                 simplifications as you can think of. You may inspire
                 yourself from the case of `Plus`. For example:
@@ -96,7 +100,17 @@ let rec copyConstPropFoldExp (vtable : VarTable)
             *)
         | And (e1, e2, pos) ->
             (* TODO project task 3: see above. you may inspire yourself from `Or` *)
-            failwith "Unimplemented copyConstPropFold for &&"
+            let e1' = copyConstPropFoldExp vtable e1
+            let e2' = copyConstPropFoldExp vtable e2
+            match (e1', e2') with
+                | (Constant (BoolVal a, _), Constant (BoolVal b, _)) ->
+                    Constant (BoolVal (a && b), pos)
+                | (Constant (BoolVal a, _), _) ->
+                    Constant (BoolVal false, pos)
+                | (_, Constant (BoolVal a, _)) ->
+                    Constant (BoolVal false, pos)
+                | _ -> And (e1', e2', pos)
+        (* This may be right - or not Kappa *)
         | Constant (x,pos) -> Constant (x,pos)
         | StringLit (x,pos) -> StringLit (x,pos)
         | ArrayLit (es, t, pos) ->

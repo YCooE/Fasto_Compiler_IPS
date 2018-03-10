@@ -677,7 +677,6 @@ let rec compileExp  (e      : TypedExp)
         If `n` is less than `0` then remember to terminate the program with
         an error -- see implementation of `iota`.
   *)
-  (* Missing check size *)
   | Replicate (n_exp, elem_exp, elem_type, pos) ->
       let elem_size = getElemSize elem_type (* gets element size of type *)
       let size_reg = newName "size_reg" (* size of input/output array *)
