@@ -96,6 +96,24 @@ BinOp : PLUS  { (Lambda
                         Plus (Var ("x", $1),
                               Var ("y", $1),
                                         $1) ,$1))}
+      | MULT  { (Lambda
+                       (Int,  [Param ("x", Int);
+                               Param ("y", Int)],
+                        Times (Var ("x", $1),
+                               Var ("y", $1),
+                                         $1) ,$1))}
+      | AND   { (Lambda
+                       (Bool, [Param ("x", Bool);
+                               Param ("y", Bool)],
+                        And   (Var ("x", $1),
+                              Var ("y", $1),
+                                        $1) ,$1))}
+      | OR  { (Lambda
+                    (Bool, [Param ("x", Bool);
+                            Param ("y", Bool)],
+                     Or    (Var ("x", $1),
+                            Var ("y", $1),
+                                      $1) ,$1))}
 ;
 
 ///////////////////////////////////////////////////////
