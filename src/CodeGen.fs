@@ -264,20 +264,14 @@ let rec compileExp  (e      : TypedExp)
       let code1 = compileExp e1 vtable t1
       let skipLabel = newName "skip"
       code1 @
-      [ Mips.LI (place, "0")
-      ; Mips.BNE (t1, place, skipLabel)
-      ; Mips.LI (place, "1")
-      ; Mips.LABEL skipLabel
-      ]
+      [ Mips.XORI (place, t1, "1")]
 
   | Negate (e1, pos) ->
       let t1 = newName "not"
-      let code1 = compileExp e1 vtable t1
+      let code1 = compileExp e1 vtable place
       let skipLabel = newName "skip"
       code1 @
-      [ Mips.LI (place, "0")
-      ; Mips.SUB (place, place, t1)
-      ]
+      [ Mips.SUB (place, "0", place)]
 
   | Let (dec, e1, pos) ->
       let (code1, vtable1) = compileDec dec vtable
