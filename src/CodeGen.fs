@@ -674,7 +674,6 @@ let rec compileExp  (e      : TypedExp)
       let size_reg = newName "size_reg" (* size of input/output array *)
       let n_code = compileExp n_exp vtable size_reg
 
-      let arr_reg  = newName "arr_reg"  (* address of array *)
       let elem_reg = newName "elem_reg" (* address of a single element *)
       let i_reg    = newName "ind_var"  (* loop counter *)
       let tmp_reg  = newName "tmp_reg"  (* several purposes *)
@@ -695,11 +694,11 @@ let rec compileExp  (e      : TypedExp)
 
       let loop_init =
               [ Mips.ADDI(addr_reg, place, "4")
-              ; Mips.MOVE(i_reg, "0")]
-
+              ; Mips.MOVE(i_reg, "0")
+              ]
       let loop_header =
               [ Mips.LABEL (loop_beg)
-              ; Mips.SUB (tmp_reg, i_reg, arr_reg)
+              ; Mips.SUB (tmp_reg, i_reg, size_reg)
               ; Mips.BGEZ (tmp_reg, loop_end)
               ]
       let loop_body =
@@ -833,7 +832,7 @@ let rec compileExp  (e      : TypedExp)
                        ]
 
       // Loop beginning
-      let loop_code = [ Mips.MOVE  (i_reg, "0"              )
+      let loop_header = [ Mips.MOVE  (i_reg, "0"              )
                       ; Mips.LABEL (loop_beg                )
                       ; Mips.SUB   (tmp_reg, i_reg, size_reg)
                       ; Mips.BGEZ  (tmp_reg, loop_end       )
@@ -850,11 +849,11 @@ let rec compileExp  (e      : TypedExp)
                           ]
 
       // Call function and store in ret_reg
-      let apply_code =
+      let apply_function =
               applyFunArg(binop, [tmp_reg; acc_reg], vtable, tmp_reg, pos)
 
       // Update acc & store result
-      let inc_ret =
+      let loop_body =
               match getElemSize tp with
                 | One  -> [ Mips.MOVE (acc_reg, tmp_reg     )
                           ; Mips.SB   (tmp_reg, ret_reg, "0")
@@ -876,10 +875,10 @@ let rec compileExp  (e      : TypedExp)
        @ get_size
        @ dynalloc(size_reg, place, tp)
        @ store_size
-       @ loop_code
+       @ loop_header
        @ load_code
-       @ apply_code
-       @ inc_ret
+       @ apply_function
+       @ loop_body
        @ loop_footer
 
 and applyFunArg ( ff     : TypedFunArg
