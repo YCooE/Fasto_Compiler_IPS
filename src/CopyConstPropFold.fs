@@ -26,15 +26,7 @@ let rec copyConstPropFoldExp (vtable : VarTable)
               | Some (ConstProp v) -> Constant(v, pos)
               | Some (VarProp y)   -> Var(y, pos)
               | None               -> Var(name, pos)
-            (*
-            let if_exists = match (SymTab.lookup name vtable) with
-                            | Some _ -> true
-                            | None -> false
-            if if_exists
-            then let newname = SymTab.fromList name
-            Var(newname, pos)
-            else Var(name, pos)
-            *)
+
             (* TODO project task 3:
                 Should probably look in the symbol table to see if
                 a binding corresponding to the current variable `name`
@@ -46,28 +38,36 @@ let rec copyConstPropFoldExp (vtable : VarTable)
                 Should probably do the same as the `Var` case, for
                 the array name, and optimize the index expression `e` as well.
             *)
+
             let e' = copyConstPropFoldExp vtable e
-            failwith"hej"
+            match SymTab.lookup name vtable with
+            | Some (VarProp y)   -> Index(y, e', t, pos)
+            | _                  -> Index(name, e', t, pos)
+
         | Let (Dec (name, e, decpos), body, pos) ->
             let e' = copyConstPropFoldExp vtable e
             match e' with
-                | Var (_, _) ->
+                | Var (a, pos) ->
                     (* TODO project task 3:
                         Hint: I have discovered a variable-copy statement `let x = a`.
                               I should probably record it in the `vtable` by
                               associating `x` with a variable-propagatee binding,
                               and optimize the `body` of the let.
                     *)
-                    failwith "Unimplemented copyConstPropFold for Let with Var"
-                | Constant (_, _) ->
+                    let vtable' = SymTab.bind name (VarProp a) (vtable)
+                    let body' = copyConstPropFoldExp vtable' body
+                    Let (Dec (name, e', decpos), body', pos)
+                | Constant (x, pos) ->
                     (* TODO project task 3:
                         Hint: I have discovered a constant-copy statement `let x = 5`.
                               I should probably record it in the `vtable` by
                               associating `x` with a constant-propagatee binding,
                               and optimize the `body` of the let.
                     *)
-                    failwith "Unimplemented copyConstPropFold for Let with Constant"
-                | Let (_, _, _) ->
+                    let vtable' = SymTab.bind name (ConstProp x) (vtable)
+                    let body' = copyConstPropFoldExp vtable' body
+                    Let (Dec (name, e', decpos), body', pos)
+                | Let (Dec(x, e2, pos), body2, pp) ->
                     (* TODO project task 3:
                         Hint: this has the structure
                                 `let y = (let x = e1 in e2) in e3`
@@ -79,7 +79,10 @@ let rec copyConstPropFoldExp (vtable : VarTable)
                         restructured, semantically-equivalent expression:
                                 `let x = e1 in let y = e2 in e3`
                     *)
-                    failwith "Unimplemented copyConstPropFold for Let with Let"
+                    let let_body = Let (Dec (name, body2, decpos), body, pos)
+                    let new_absyn = Let (Dec (name, e2, pos), let_body, pp)
+                    let new_let = copyConstPropFoldExp vtable new_absyn
+                    new_let
                 | _ -> (* Fallthrough - for everything else, do nothing *)
                     let body' = copyConstPropFoldExp vtable body
                     Let (Dec (name, e', decpos), body', pos)
@@ -109,9 +112,9 @@ let rec copyConstPropFoldExp (vtable : VarTable)
             match (e1', e2') with
                 | (Constant (BoolVal a, _), Constant (BoolVal b, _)) ->
                     Constant (BoolVal (a && b), pos)
-                | (Constant (BoolVal a, _), _) ->
+                | (Constant (BoolVal false, _), _) ->
                     Constant (BoolVal false, pos)
-                | (_, Constant (BoolVal a, _)) ->
+                | (_, Constant (BoolVal false, _)) ->
                     Constant (BoolVal false, pos)
                 | _ -> And (e1', e2', pos)
         (* This may be right - or not Kappa *)
