@@ -262,14 +262,12 @@ let rec compileExp  (e      : TypedExp)
   | Not (e1, pos) ->
       let t1 = newName "not"
       let code1 = compileExp e1 vtable t1
-      let skipLabel = newName "skip"
       code1 @
       [ Mips.XORI (place, t1, "1")]
 
   | Negate (e1, pos) ->
       let t1 = newName "not"
       let code1 = compileExp e1 vtable place
-      let skipLabel = newName "skip"
       code1 @
       [ Mips.SUB (place, "0", place)]
 
