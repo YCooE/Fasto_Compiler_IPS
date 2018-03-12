@@ -80,24 +80,20 @@ _false_16_:
 # 	ori	2,_arg_11_,0
 	jal	write_nl
 # was:	jal	write_nl, 2
-	ori	$17, $2, 0
+	ori	$18, $2, 0
 # was:	ori	_letBind_10_, 2, 0
 	ori	$11, $0, 3
 # was:	ori	_divide_L_22_, 0, 3
 	ori	$10, $0, 2
 # was:	ori	_divide_R_23_, 0, 2
-	div	$10, $11, $10
-# was:	div	_not_21_, _divide_L_22_, _divide_R_23_
-	ori	$11, $0, 0
-# was:	ori	_eq_L_19_, 0, 0
-	sub	$11, $11, $10
-# was:	sub	_eq_L_19_, _eq_L_19_, _not_21_
-	ori	$12, $0, 2
-# was:	ori	_not_25_, 0, 2
-	ori	$10, $0, 0
-# was:	ori	_eq_R_20_, 0, 0
-	sub	$10, $10, $12
-# was:	sub	_eq_R_20_, _eq_R_20_, _not_25_
+	div	$11, $11, $10
+# was:	div	_eq_L_19_, _divide_L_22_, _divide_R_23_
+	sub	$11, $0, $11
+# was:	sub	_eq_L_19_, 0, _eq_L_19_
+	ori	$10, $0, 2
+# was:	ori	_eq_R_20_, 0, 2
+	sub	$10, $0, $10
+# was:	sub	_eq_R_20_, 0, _eq_R_20_
 	ori	$2, $0, 0
 # was:	ori	_arg_18_, 0, 0
 	bne	$11, $10, _false_27_
@@ -110,22 +106,18 @@ _false_27_:
 # was:	jal	write_nl, 2
 	ori	$16, $2, 0
 # was:	ori	_letBind_17_, 2, 0
-	ori	$12, $0, 3
+	ori	$11, $0, 3
 # was:	ori	_divide_L_32_, 0, 3
-	ori	$11, $0, 2
-# was:	ori	_not_34_, 0, 2
-	ori	$10, $0, 0
-# was:	ori	_divide_R_33_, 0, 0
-	sub	$10, $10, $11
-# was:	sub	_divide_R_33_, _divide_R_33_, _not_34_
-	div	$11, $12, $10
+	ori	$10, $0, 2
+# was:	ori	_divide_R_33_, 0, 2
+	sub	$10, $0, $10
+# was:	sub	_divide_R_33_, 0, _divide_R_33_
+	div	$11, $11, $10
 # was:	div	_eq_L_30_, _divide_L_32_, _divide_R_33_
-	ori	$12, $0, 2
-# was:	ori	_not_36_, 0, 2
-	ori	$10, $0, 0
-# was:	ori	_eq_R_31_, 0, 0
-	sub	$10, $10, $12
-# was:	sub	_eq_R_31_, _eq_R_31_, _not_36_
+	ori	$10, $0, 2
+# was:	ori	_eq_R_31_, 0, 2
+	sub	$10, $0, $10
+# was:	sub	_eq_R_31_, 0, _eq_R_31_
 	ori	$2, $0, 0
 # was:	ori	_arg_29_, 0, 0
 	bne	$11, $10, _false_38_
@@ -136,22 +128,18 @@ _false_38_:
 # 	ori	2,_arg_29_,0
 	jal	write_nl
 # was:	jal	write_nl, 2
-	ori	$18, $2, 0
+	ori	$17, $2, 0
 # was:	ori	_letBind_28_, 2, 0
-	ori	$12, $0, 3
+	ori	$11, $0, 3
 # was:	ori	_divide_L_44_, 0, 3
-	ori	$11, $0, 2
-# was:	ori	_not_46_, 0, 2
-	ori	$10, $0, 0
-# was:	ori	_divide_R_45_, 0, 0
-	sub	$10, $10, $11
-# was:	sub	_divide_R_45_, _divide_R_45_, _not_46_
-	div	$10, $12, $10
-# was:	div	_not_43_, _divide_L_44_, _divide_R_45_
-	ori	$11, $0, 0
-# was:	ori	_eq_L_41_, 0, 0
-	sub	$11, $11, $10
-# was:	sub	_eq_L_41_, _eq_L_41_, _not_43_
+	ori	$10, $0, 2
+# was:	ori	_divide_R_45_, 0, 2
+	sub	$10, $0, $10
+# was:	sub	_divide_R_45_, 0, _divide_R_45_
+	div	$11, $11, $10
+# was:	div	_eq_L_41_, _divide_L_44_, _divide_R_45_
+	sub	$11, $0, $11
+# was:	sub	_eq_L_41_, 0, _eq_L_41_
 	ori	$10, $0, 1
 # was:	ori	_eq_R_42_, 0, 1
 	ori	$2, $0, 0
@@ -168,7 +156,7 @@ _false_49_:
 # 	ori	_and_L_55_,_letBind_10_,0
 	ori	$10, $0, 0
 # was:	ori	_and_L_53_, 0, 0
-	beq	$17, $10, _false_57_
+	beq	$18, $10, _false_57_
 # was:	beq	_and_L_55_, _and_L_53_, _false_57_
 # 	ori	_and_R_56_,_letBind_17_,0
 	beq	$16, $10, _false_57_
@@ -181,7 +169,7 @@ _false_57_:
 	beq	$10, $11, _false_58_
 # was:	beq	_and_L_53_, _and_L_51_, _false_58_
 # 	ori	_and_R_54_,_letBind_28_,0
-	beq	$18, $11, _false_58_
+	beq	$17, $11, _false_58_
 # was:	beq	_and_R_54_, _and_L_51_, _false_58_
 	ori	$11, $0, 1
 # was:	ori	_and_L_51_, 0, 1

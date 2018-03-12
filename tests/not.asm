@@ -21,16 +21,11 @@ _stop_:
 main:
 	sw	$31, -4($29)
 	addi	$29, $29, -8
-	ori	$11, $0, 1
+	ori	$10, $0, 1
 # was:	ori	_letBind_2_, 0, 1
 # 	ori	_not_4_,_letBind_2_,0
-	ori	$10, $0, 0
-# was:	ori	_letBind_3_, 0, 0
-	bne	$11, $10, _skip_5_
-# was:	bne	_not_4_, _letBind_3_, _skip_5_
-	ori	$10, $0, 1
-# was:	ori	_letBind_3_, 0, 1
-_skip_5_:
+	xori	$10, $10, 1
+# was:	xori	_letBind_3_, _not_4_, 1
 # 	ori	_cond_9_,_letBind_3_,0
 	bne	$10, $0, _then_6_
 # was:	bne	_cond_9_, 0, _then_6_

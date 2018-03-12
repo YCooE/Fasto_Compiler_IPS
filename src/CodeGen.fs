@@ -824,23 +824,15 @@ let rec compileExp  (e      : TypedExp)
       // Get size of input array, and go to first element
       let get_size = [ Mips.LW   (size_reg,  arr_reg, "0")
                      ; Mips.ADDI (arr_reg ,  arr_reg, "4")
-                     ; Mips.ADDI (tmp_reg , size_reg, "1") // Tmp = size + 1
                      ]
+
+      // dynalloc (size_reg, place, tp)
 
       // Store size
       let store_size = [ Mips.ADDI (ret_reg ,    place, "0") // Set ret_reg = place
-                       ; Mips.SW   (tmp_reg , ret_reg , "0") // Store length
+                       ; Mips.SW   (size_reg, ret_reg , "0") // Store length
                        ; Mips.ADDI (ret_reg , ret_reg , "4") // Advance to first elem
                        ]
-
-      // Before loop we store the first elem in ret array
-      let store_first = match getElemSize tp with
-                          | One  -> [ Mips.SB   (acc_reg, ret_reg, "0")
-                                    ; Mips.ADDI (ret_reg, ret_reg, "1")
-                                    ]
-                          | Four -> [ Mips.SW   (acc_reg, ret_reg, "0")
-                                    ; Mips.ADDI (ret_reg, ret_reg, "4")
-                                    ]
 
       // Loop beginning
       let loop_code = [ Mips.MOVE  (i_reg, "0"              )
@@ -884,9 +876,8 @@ let rec compileExp  (e      : TypedExp)
       acc_code
        @ arr_code
        @ get_size
-       @ dynalloc(tmp_reg, place, tp)
+       @ dynalloc(size_reg, place, tp)
        @ store_size
-       @ store_first
        @ loop_code
        @ load_code
        @ apply_code
