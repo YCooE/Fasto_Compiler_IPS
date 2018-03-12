@@ -1,5 +1,6 @@
 # GAssignIps1
 Gruppe opgave "Implementering af informationssystemer"
+
 Task 1:
 When constructing the abstract syntax for boolean
 values, is it then necessary to keep the actual F#
