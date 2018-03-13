@@ -1,0 +1,7 @@
+fun int main() =
+    let n = 5 in
+    let plus = n + n in
+    let times = plus * plus in
+    let divide = times / plus in
+    let minus = divide - plus
+    in write(minus)
