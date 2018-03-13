@@ -94,10 +94,10 @@ let rec copyConstPropFoldExp (vtable : VarTable)
                    Constant (IntVal (x * y), pos)
                 | (Constant (IntVal 0, _), _) -> Constant(IntVal 0, pos)
                 | (_, Constant (IntVal  0, _)) -> Constant(IntVal 0, pos)
-                | (Constant (IntVal 1, _), _) -> e1'
-                | (_, Constant (IntVal 1, _)) -> e2'
-                | (Constant (IntVal -1, _), _) -> Negate (e1', pos)
-                | (_, Constant (IntVal -1, _)) -> Negate (e2', pos)
+                | (Constant (IntVal 1, _), _) -> e2'
+                | (_, Constant (IntVal 1, _)) -> e1'
+                | (Constant (IntVal -1, _), _) -> Negate (e2', pos)
+                | (_, Constant (IntVal -1, _)) -> Negate (e1', pos)
                 | _ -> Times (e1', e2', pos)
             (* TODO project task 3: implement as many safe algebraic
                 simplifications as you can think of. You may inspire
@@ -117,7 +117,6 @@ let rec copyConstPropFoldExp (vtable : VarTable)
                 | (_, Constant (BoolVal false, _)) ->
                     Constant (BoolVal false, pos)
                 | _ -> And (e1', e2', pos)
-        (* This may be right - or not Kappa *)
         | Constant (x,pos) -> Constant (x,pos)
         | StringLit (x,pos) -> StringLit (x,pos)
         | ArrayLit (es, t, pos) ->
