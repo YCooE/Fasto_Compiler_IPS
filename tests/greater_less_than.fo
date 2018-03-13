@@ -1,0 +1,4 @@
+fun bool main() =
+    let b = 5 > 3 in
+    let t = 3 < 5
+    in write(b && t)
