@@ -80,9 +80,8 @@ let rec copyConstPropFoldExp (vtable : VarTable)
                                 `let x = e1 in let y = e2 in e3`
                     *)
                     let let_body = Let (Dec (name, body2, decpos), body, pos)
-                    let new_absyn = Let (Dec (name, e2, pos), let_body, pp)
-                    let new_let = copyConstPropFoldExp vtable new_absyn
-                    new_let
+                    let new_absyn = Let (Dec (x, e2, pos), let_body, pp)
+                    copyConstPropFoldExp vtable new_absyn
                 | _ -> (* Fallthrough - for everything else, do nothing *)
                     let body' = copyConstPropFoldExp vtable body
                     Let (Dec (name, e', decpos), body', pos)
