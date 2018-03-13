@@ -704,7 +704,7 @@ let rec compileExp  (e      : TypedExp)
       let loop_body =
               [ mipsStore elem_size (elem_reg, addr_reg, "0")]
       let loop_footer =
-              [ Mips.ADDI(addr_reg, place, makeConst(elemSizeToInt elem_size))
+              [ Mips.ADDI(addr_reg, addr_reg, makeConst(elemSizeToInt elem_size))
               ; Mips.ADDI (i_reg, i_reg, "1")
               ; Mips.J loop_beg
               ; Mips.LABEL loop_end]
