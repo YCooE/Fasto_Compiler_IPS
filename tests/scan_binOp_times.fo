@@ -1,0 +1,8 @@
+fun int write_int(int i) = write(i)
+
+fun [int] write_int_arr([int] i) = map(write_int, i)
+
+fun [int] main() =
+    let x = {1, 2, 3, 4} in
+    let r = scan(op *, 2, x)
+    in write_int_arr(r)

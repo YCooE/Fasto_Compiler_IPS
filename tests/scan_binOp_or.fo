@@ -1,0 +1,8 @@
+fun bool write_bool(bool b) = write(b)
+
+fun [bool] write_bool_arr([bool] b) = map(write_bool, b)
+
+fun [bool] main() =
+    let x = {true, true, false, true, false} in
+    let r = scan(op ||, true, x)
+    in write_bool_arr(r)
