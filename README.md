@@ -2,13 +2,8 @@
 Gruppe opgave "Implementering af informationssystemer"
 
 Task 1:
-When constructing the abstract syntax for boolean
-values, is it then necessary to keep the actual F#
-truth values?
 
-Look at the precedence for unary minus again. There
-is an example in the group project pdf.
-
+Done
 
 Task 2:
 
@@ -20,8 +15,8 @@ Done
 
 Testing:
 
-Not done
+Done
 
 Report:
 
-Not done
+Done
