@@ -22,6 +22,7 @@ open System;;
 open Microsoft.FSharp.Text.Lexing;;
 open System.Text;;
 
+
 (* A lexer definition for Fasto, for use with fslex. *)
 
 (* boilerplate code for all lexer files... *)
@@ -64,8 +65,8 @@ let keyword (s, pos) =
        | "fn"           -> Parser.FN pos
        | "op"           -> Parser.OP pos
        | "not"          -> Parser.NOT pos
-       | "true"         -> Parser.TRUE pos
-       | "false"        -> Parser.FALSE pos
+       | "true"         -> Parser.TRUE (true, pos)
+       | "false"        -> Parser.FALSE (false, pos)
 
 (* specials: *)
        | "iota"         -> Parser.IOTA pos
