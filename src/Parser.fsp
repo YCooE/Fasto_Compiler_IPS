@@ -37,7 +37,7 @@ let parse_error_rich =
 %token <int*(int*int)> NUM
 %token <char*(int*int)> CHARLIT
 %token <string*(int*int)> ID STRINGLIT
-%token <bool*(int*int)> TRUE FALSE
+%token <(int*int)> TRUE FALSE
 %token <(int*int)> IF THEN ELSE LET IN EOF
 %token <(int*int)> INT CHAR BOOL
 %token <(int*int)> PLUS MINUS MULT DIV NEG
@@ -49,10 +49,11 @@ let parse_error_rich =
 %nonassoc ifprec letprec
 %left OR
 %left AND
-%left NOT
-%left DEQ LTH RTH NEG
+%nonassoc NOT
+%left DEQ LTH RTH
 %left PLUS MINUS
 %left MULT DIV
+%nonassoc NEG
 
 %start Prog
 %type <AbSyn.UntypedProg> Prog
