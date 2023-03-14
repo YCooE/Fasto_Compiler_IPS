@@ -1,22 +1,10 @@
-# GAssignIps1
-Gruppe opgave "Implementering af informationssystemer"
+# The Fasto Compiler
 
-Task 1:
+This is the compiler for the Fasto programming language.  The source
+code resides in the 'src' directory.
 
-Done
+To build the compiler, run 'make'.
 
-Task 2:
+To print, compile or interpret a Fasto program, run 'bin/fasto'.
 
-Done
-
-Task 3:
-
-Done
-
-Testing:
-
-Done
-
-Report:
-
-Done
+To run all tests from the 'tests' directory, run 'bin/runtests.sh'.
